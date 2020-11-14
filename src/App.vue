@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <router-view v-show="$route.meta.isLogin" />
+    <router-view />
   </div>
 </template>
 
