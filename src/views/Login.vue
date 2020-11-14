@@ -1,83 +1,89 @@
 <template>
-  <a-form
-    id="components-form-demo-normal-login"
-    :form="form"
-    class="login-form"
-    @submit="handleSubmit"
-  >
-    <a-form-item>
-      <a-input
-        v-decorator="[
-          'userName',
-          {
-            rules: [{ required: true, message: 'Please input your username!' }],
-          },
-        ]"
-        placeholder="Username"
-      >
-        <a-icon slot="prefix" type="user" style="color: rgba(0, 0, 0, 0.25)" />
-      </a-input>
-    </a-form-item>
-    <a-form-item>
-      <a-input
-        v-decorator="[
-          'password',
-          {
-            rules: [{ required: true, message: 'Please input your Password!' }],
-          },
-        ]"
-        type="password"
-        placeholder="Password"
-      >
-        <a-icon slot="prefix" type="lock" style="color: rgba(0, 0, 0, 0.25)" />
-      </a-input>
-    </a-form-item>
-    <a-form-item>
-      <a-checkbox
-        v-decorator="[
-          'remember',
-          {
-            valuePropName: 'checked',
-            initialValue: true,
-          },
-        ]"
-      >
-        记住我
-      </a-checkbox>
-      <a class="login-form-forgot" href=""> 忘记密码 </a>
-      <a-button type="primary" html-type="submit" class="login-form-button">
-        登录
+<a-form-model class="login-form" ref="loginForm" :model="loginForm" :rules="rules" v-bind="layout">
+    <a-form-model-item has-feedback label="邮箱" prop="email">
+      <a-input v-model="loginForm.email" type="email" />
+    </a-form-model-item>
+    <a-form-model-item has-feedback label="密码" prop="password">
+      <a-input v-model="loginForm.password" type="password" autocomplete="off" />
+    </a-form-model-item>
+    <a-form-model-item :wrapper-col="{ span: 14, offset: 4 }">
+      <a-button type="primary" @click="submitForm('loginForm')">
+        提交
       </a-button>
-      <a href=""> 注册 </a>
-    </a-form-item>
-  </a-form>
+      <a-button style="margin-left: 10px" @click="resetForm('loginForm')">
+        重置
+      </a-button>
+    </a-form-model-item>
+  </a-form-model>
 </template>
-
 <script>
+import api from '@/api/user';
+
 export default {
-  beforeCreate() {
-    this.form = this.$form.createForm(this, { name: 'normal_login' });
+  data() {
+    const emailReg = /^[\w-]+@[\w.-]+.com$/;
+    const checkEmail = (rule, value, callback) => {
+      if (!value) {
+        return callback(new Error('请输入邮箱！'));
+      }
+      if (emailReg.test(value)) {
+        return callback();
+      }
+      return callback(new Error('邮箱格式不正确！'));
+    };
+    const validatePass = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请输入密码！'));
+      } else {
+        callback();
+      }
+    };
+    return {
+      loginForm: {
+        email: '',
+        password: '',
+      },
+      rules: {
+        password: [{ validator: validatePass, trigger: 'change' }],
+        email: [{ validator: checkEmail, trigger: 'change' }],
+      },
+      layout: {
+        labelCol: { span: 4 },
+        wrapperCol: { span: 14 },
+      },
+    };
   },
   methods: {
-    handleSubmit(e) {
-      e.preventDefault();
-      this.form.validateFields((err, values) => {
-        if (!err) {
-          console.log('Received values of form: ', values);
+    submitForm(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          api.login(this.loginForm).then((resp) => {
+            // if (resp.role === 'coustomer') {
+            //   console.log(resp.role);
+            // }
+            // 登陆成功后保存用户名
+            this.$store.dispatch('changeUserName', resp.username);
+            //  登陆成功后跳转到首页
+            this.$router.push({
+              name: 'Home',
+            });
+          }).catch((error) => {
+            // 弹出错误信息 ant-design的方法
+            this.$message.error(error);
+          });
+          return true;
         }
+        // console.log('error submit!!');
+        return false;
       });
+    },
+    resetForm(formName) {
+      this.$refs[formName].resetFields();
     },
   },
 };
 </script>
 <style>
-#components-form-demo-normal-login .login-form {
-  max-width: 300px;
-}
-#components-form-demo-normal-login .login-form-forgot {
-  float: right;
-}
-#components-form-demo-normal-login .login-form-button {
-  width: 100%;
-}
+@import url('~@/assets/css/login.less');
+
 </style>
