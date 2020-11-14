@@ -62,7 +62,7 @@ export default {
             //   console.log(resp.role);
             // }
             // 登陆成功后保存用户名
-            this.$store.dispatch('changeUserName', resp.username);
+            this.$store.dispatch('setUserInfo', resp);
             //  登陆成功后跳转到首页
             this.$router.push({
               name: 'Home',

@@ -1,27 +1,43 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import { setCookie, getUserCookie, removeUserCookie } from '@/util/userCookie';
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    // 导航的收缩状态 false为展开
     collapsed: false,
-    username: '',
+    // 用户信息
+    user: getUserCookie(),
   },
   mutations: {
     changeCollapsed(state) {
       state.collapsed = !state.collapsed;
     },
-    changeUserName(state, payload) {
-      state.username = payload;
+    setUserInfo(state, payload) {
+      state.user = payload;
+      setCookie(payload);
+    },
+    logout(state) {
+      state.user = {
+        username: '',
+        appkey: '',
+        role: '',
+        email: '',
+      };
     },
   },
   actions: {
     changeCollapsed({ commit }) {
       commit('changeCollapsed');
     },
-    changeUserName({ commit }, payload) {
-      commit('changeUserName', payload);
+    setUserInfo({ commit }, payload) {
+      commit('setUserInfo', payload);
+    },
+    logout({ commit }) {
+      commit('logout');
+      removeUserCookie();
     },
   },
   modules: {

@@ -14,8 +14,8 @@
           </a-breadcrumb>
         </div>
         <ul class="user-info">
-          <li>欢迎 {{username}}<a-icon type="down" /></li>
-          <li>退出</li>
+          <li>欢迎 {{user.username}}<a-icon type="down" /></li>
+          <li @click="logout">退出</li>
         </ul>
       </div>
 </template>
@@ -25,11 +25,17 @@ import { mapState } from 'vuex';
 
 export default {
   computed: {
-    ...mapState(['username']),
+    ...mapState(['user']),
   },
   methods: {
     toggleCollapsed() {
       this.$store.dispatch('changeCollapsed');
+    },
+    logout() {
+      this.$store.dispatch('logout');
+      this.$router.push({
+        name: 'Login',
+      });
     },
   },
 };
