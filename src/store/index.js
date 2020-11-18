@@ -10,14 +10,16 @@ export default new Vuex.Store({
     collapsed: false,
     // 用户信息
     user: getUserCookie(),
+    // 存储菜单路由
+    menuRoutes: [],
   },
   mutations: {
     changeCollapsed(state) {
       state.collapsed = !state.collapsed;
     },
-    setUserInfo(state, payload) {
-      state.user = payload;
-      setCookie(payload);
+    setUserInfo(state, userInfo) {
+      state.user = userInfo;
+      setCookie(userInfo);
     },
     logout(state) {
       state.user = {
@@ -27,17 +29,23 @@ export default new Vuex.Store({
         email: '',
       };
     },
+    changeMenuRoutes(state, routes) {
+      state.menuRoutes = routes;
+    },
   },
   actions: {
     changeCollapsed({ commit }) {
       commit('changeCollapsed');
     },
-    setUserInfo({ commit }, payload) {
-      commit('setUserInfo', payload);
+    setUserInfo({ commit }, userInfo) {
+      commit('setUserInfo', userInfo);
     },
     logout({ commit }) {
       commit('logout');
       removeUserCookie();
+    },
+    changeMenuRoutes({ commit }, routes) {
+      commit('changeMenuRoutes', routes);
     },
   },
   modules: {

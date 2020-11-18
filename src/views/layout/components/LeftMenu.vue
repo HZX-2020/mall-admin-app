@@ -8,15 +8,12 @@
       theme="dark"
       :inline-collapsed="$store.state.collapsed"
     >
-      <a-sub-menu key="1">
-        <span slot="title"><a-icon type="home" /><span>首页</span></span>
-        <a-menu-item key="8">统计</a-menu-item>
+      <a-sub-menu v-for="route in $store.state.menuRoutes" :key="route.name">
+        <span slot="title"><a-icon type="home" /><span>{{route.meta.title}}</span></span>
+        <a-menu-item v-for="child in route.children"
+        :key="child.name">{{child.meta.title}}</a-menu-item>
       </a-sub-menu>
-      <a-sub-menu key="2">
-        <span slot="title"><a-icon type="desktop" /><span>商家</span></span>
-        <a-menu-item key="6"> Option 6 </a-menu-item>
-        <a-menu-item key="7"> Option 7 </a-menu-item>
-      </a-sub-menu>
+
     </a-menu>
   </div>
 </template>
