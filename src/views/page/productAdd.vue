@@ -1,59 +1,116 @@
 <template>
-  <div class="add">
-    <a-input placeholder="" />
-    <a-textarea placeholder="" :auto-size="{ minRows: 2, maxRows: 6 }" />
-    <div>
-    <a-select :default-value="provinceData[0]" style="width: 120px" @change="handleProvinceChange">
-      <a-select-option v-for="province in provinceData" :key="province">
-        {{ province }}
-      </a-select-option>
-    </a-select>
-    <a-select v-model="secondCity" style="width: 120px">
-      <a-select-option v-for="city in cities" :key="city">
-        {{ city }}
-      </a-select-option>
-    </a-select>
-  </div>
-    <a-select
-      mode="multiple"
-      :default-value="['a1', 'b2']"
-      style="width: 100%"
-      placeholder="Please select"
-      @change="handleChange"
-    >
-      <a-select-option v-for="i in 25" :key="(i + 9).toString(36) + i">
-        {{ (i + 9).toString(36) + i }}
-      </a-select-option>
-    </a-select>
+  <div class="product-detail">
+    <a-steps :current="current" class="product-steps">
+      <a-step v-for="item in steps" :key="item.title" :title="item.title" />
+    </a-steps>
+    <div class="steps-content">
+      <basic-info v-if="current === 0" @next="next" :form="form" />
+      <sale-info v-else-if="current === 1" @next="next" @prev="prev" :form="form" />
+    </div>
   </div>
 </template>
 
 <script>
-const provinceData = ['Zhejiang', 'Jiangsu'];
-const cityData = {
-  Zhejiang: ['Hangzhou', 'Ningbo', 'Wenzhou'],
-  Jiangsu: ['Nanjing', 'Suzhou', 'Zhenjiang'],
-};
+import api from '@/api/product';
+import SaleInfo from '@/components/saleDetail.vue';
+import BasicInfo from '@/components/basicDetail.vue';
+
 export default {
   data() {
     return {
-      provinceData,
-      cityData,
-      cities: cityData[provinceData[0]],
-      secondCity: cityData[provinceData[0]][0],
+      current: 0,
+      form: {
+        title: '',
+        desc: '',
+        category: [],
+        c_items: [],
+        tags: [],
+        price: 0,
+        price_off: 0,
+        unit: '',
+        status: 0,
+        images: [],
+        inventory: 0,
+      },
+      steps: [
+        {
+          title: '填写商品基本信息',
+        },
+        {
+          title: '填写商品销售信息',
+        },
+      ],
     };
   },
+  components: {
+    BasicInfo,
+    SaleInfo,
+  },
+  created() {
+    const { id } = this.$route.params;
+    if (id) {
+      // 读取商品详情
+      api.detail(id).then((res) => {
+        this.form = res;
+      });
+    }
+  },
   methods: {
-    handleChange(value) {
-      console.log(`selected ${value}`);
+    next(form) {
+      this.form = {
+        ...this.form,
+        form,
+      };
+      if (this.current === 1) {
+        // 提交数据
+        if (this.$route.params.id) { // 编辑页面的提交
+          api.edit(this.form).then(() => {
+            this.$message.success('修改成功');
+            this.$router.push({
+              name: 'ProductList',
+            });
+          });
+        } else {
+          api.add(this.form).then(() => { // 添加页面的提交
+            this.$message.success('添加成功');
+            this.$router.push({
+              name: 'ProductList',
+            });
+          });
+        }
+      } else {
+        this.current += 1;
+      }
     },
-    handleProvinceChange(value) {
-      this.cities = cityData[value];
-      // this.secondCity = cityData[value][0];
+    prev(form) {
+      this.current -= 1;
+      this.form = {
+        ...this.form,
+        form,
+      };
     },
   },
 };
 </script>
+<style lang="less" scoped>
+.product-detail {
+  .product-steps {
+    width: 50%;
+    margin: 20px auto;
+  }
+  .steps-content {
+  margin-top: 16px;
+  border: 1px dashed #e9e9e9;
+  border-radius: 6px;
+  background-color: #fafafa;
+  min-height: 200px;
+  text-align: center;
+  padding-top: 80px;
+}
 
-<style>
+.steps-action {
+  margin-top: 24px;
+}
+}
+
 </style>

@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
  * @param {Object} info
  */
 export function setCookie(info) {
-  const arr = Object.entries(info);
+  const arr = Object.entries(info); // 对象=>数组
   for (let i = 0; i < arr.length; i += 1) {
     Cookies.set(arr[i][0], arr[i][1]);
   }

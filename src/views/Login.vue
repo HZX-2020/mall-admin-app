@@ -7,7 +7,8 @@
       <a-input v-model="loginForm.password" type="password" autocomplete="off" />
     </a-form-model-item>
     <a-form-model-item :wrapper-col="{ span: 14, offset: 4 }">
-      <a-button type="primary" @click="submitForm('loginForm')">
+      <a-button type="primary"
+      @click="submitForm('loginForm')">
         提交
       </a-button>
       <a-button style="margin-left: 10px" @click="resetForm('loginForm')">
@@ -53,14 +54,20 @@ export default {
       },
     };
   },
+  created() {
+    document.onkeydown = (e) => {
+      // e = window.event || e;
+      if (this.$route.path === '/login' && (e.code === 'Enter' || e.code === 'enter')) {
+      // 验证在登录界面和按得键是回车键enter
+        this.submitForm('loginForm');// 登录函数
+      }
+    };
+  },
   methods: {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           api.login(this.loginForm).then((resp) => {
-            // if (resp.role === 'coustomer') {
-            //   console.log(resp.role);
-            // }
             // 登陆成功后保存用户名
             this.$store.dispatch('setUserInfo', resp);
             //  登陆成功后跳转到首页
